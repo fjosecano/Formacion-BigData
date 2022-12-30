@@ -1,1 +1,77 @@
+############# Parte 1 #############
+
+1. Crea un directorio local de trabajo (Por ejemplo /home/cloudera/ejercicio)
+mkdir /home/cloudera/ejercicio
+
+2. Copia el archivo “shakespeare.tar.gz” en ese directorio
+cp /src/shakespeare.tar.gz /home/cloudera/ejercicios/
+
+3. Descomprime el archivo
+tar zxvf /home/cloudera/ejercicios/shakespeare.tar.gz
+
+4. Copia la carpeta que acabas de descomprimir en HDFS en la ruta /user/cloudera/shakespeare. Tu home a partir de ahora será /user/cloudera
+hdfs dfs -put shakespeare /user/cloudera/shakespeare
+
+5. Lista el contenido de tu home en HDFS para comprobar que se ha copiado la carpeta shakespeare.
+dfs -ls /user/cloudera
+
+6. Borra la subcarpeta “glossary” de la carpeta shakespeare en HDFS
+hdfs dfs -rm /user/cloudera/shakespeare/glossary
+
+7. Comprueba que se ha borrado
+hdfs dfs -ls /user/cloudera/shakespeare
+
+8. Lista las primeras 50 últimas líneas de la subcarpeta “histories”. Puedes usar los comando 
+“cat” y “tail” (head -> primeras)
+hadoop fs -cat /user/cloudera/shakespeare/histories | tail -n 50
+
+9. Copia al Sistema de ficheros local de tu MV el fichero “poems” en la ruta /home/cloudera/ejercicios/shakespeare/shakepoems.txt
+hdfs dfs -get /user/cloudera/shakespeare/poems /home/cloudera/ejercicios/shakespeare/shakepoems.txt
+
+10. Muestra las últimas líneas de shakepoems.txt copiado en tu local por pantalla
+tail /home/cloudera/ejercicios/shakespeare/shakepoems.txt
+
+############# Parte 2 #############
+
+1. Copiar en la ruta “/home/cloudera/ejercicios” la carpeta “wordcount” y su contenido.
+cp -r /src/wordcount /home/cloudera/ejercicios/
+
+2. Comprobar que se han copiado correctamente
+ls /home/cloudera/ejercicios/
+
+3. La carpeta wordcount, como hemos visto, ya contiene los javas compilados y el jar creado, 
+por lo que solo tenemos que ejecutar el submit del job hadoop usando nuestro fichero JAR 
+para contar las ocurrencias de palabras contenidas en nuestra carpeta “shakespeare”. 
+Nuestro jar contiene las clases java compiladas dentro de un paquete llamado “solutions”, 
+por eso se le llama de este modo.
+
+hadoop jar wc.jar solution.WordCount /user/cloudera/shakespeare /user/cloudera/wordcounts
+
+4.Una vez ejecutado, probamos a ejecutarlo nuevamente. ¿Qué ocurre?
+Ya existe
+
+5. Comprobamos el resultado de nuestro MapReduce
+hdfs dfs -ls /user/cloudera/wordcounts
+
+6. Como solo hemos usado un reduce, vemos que solo hay un archivo de salida. Observamos el contenido del fichero.
+hdfs dfs -cat /user/cloudera/wordcounts/part-r-00000 | less
+#Escribiendo la letra “q” salimos del comando less
+
+7. Volvemos a ejecutar el job de nuevo para poems
+hadoop jar wc.jar solution.WordCount /user/cloudera/shakespeare/poems /user/cloudera/pwords
+
+8. Borramos la salida producida por nuestros jobs
+hdfs dfs -rm -r /user/cloudera/wordcounts 
+hdfs dfs -rm -r /user/cloudera/pwords
+
+9. Ejecutamos nuevamente nuestro job
+hadoop jar wc.jar solution.WordCount /user/cloudera/shakespeare /user/cloudera/count2
+
+10. Mientras se ejecuta, en otro terminal ejecutamos lo siguiente, para ver la lista de Jobs que 
+se están ejecutando
+“mapred job -list”
+
+11. Si conocemos la id de un job, lo podemos matar. Recordemos que cerrando un terminal no 
+se mata el job. Para ello, ejecutamos en otra terminal lo siguiente
+“mapred job -kill jobid”
 
